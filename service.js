@@ -6,8 +6,9 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 
-// НАСТРОЙКИ: Поменяйте на свои данные
-const MS_TOKEN = 'ВАШ_API_ТОКЕН_МОЙСКЛАД';
+
+
+const MS_TOKEN = process.env.MS_TOKEN; 
 const LOGIN = 'admin';       // Логин для входа на ваш сайт
 const PASSWORD = 'password123'; // Пароль для входа на ваш сайт
 
