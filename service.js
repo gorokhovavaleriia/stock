@@ -1,27 +1,5 @@
-const express = require('express');
-const axios = require('axios');
-const dayjs = require('dayjs');
-const path = require('path');
+// НАЧАЛО ЗАМЕНЫ: Найдите роут /api/stock-history и замените его до конца файла
 
-const app = express();
-app.use(express.json());
-
-
-
-const MS_TOKEN = process.env.MS_TOKEN; 
-const LOGIN = 'admin';       // Логин для входа на ваш сайт
-const PASSWORD = 'password123'; // Пароль для входа на ваш сайт
-
-// 1. Роут для проверки логина и пароля
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    if (username === LOGIN && password === PASSWORD) {
-        return res.json({ success: true });
-    }
-    res.status(401).json({ error: 'Неверный логин или пароль' });
-});
-
-// 2. Роут для получения данных из МоегоСклада
 app.get('/api/stock-history', async (req, res) => {
     const productId = req.query.productId;
     if (!productId) return res.status(400).json({ error: 'Не указан productId' });
@@ -41,6 +19,8 @@ app.get('/api/stock-history', async (req, res) => {
                     moment: dateStr
                 }
             };
+            // Добавляем задержку в 50мс между запросами, чтобы МойСклад нас не блокировал
+            await new Promise(resolve => setTimeout(resolve, 50));
             requests.push({ date: dayjs().subtract(i, 'day').format('DD.MM'), req: axios.get(url, config) });
         }
 
@@ -48,8 +28,8 @@ app.get('/api/stock-history', async (req, res) => {
 
         responses.forEach((response, index) => {
             let stock = 0;
-            if (response && response.status === 200 && response.data.rows?.length > 0) {
-                stock = response.data.rows[0].stock || 0;
+            if (response && response.status === 200 && response.data?.rows?.length > 0) {
+                stock = response.data.rows[0].stock || 0; // Исправлено получение остатка из массива rows
             }
             history.push({ date: requests[index].date, stock: stock });
         });
@@ -60,9 +40,9 @@ app.get('/api/stock-history', async (req, res) => {
     }
 });
 
-// 3. Отдаем фронтенд файлы
+// Отдаем фронтенд файлы
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Запуск на порту 3000 (или порту хостинга)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+// ВАЖНО: Render требует порт 10000 по умолчанию
+const PORT = process.env.PORT || 10000; 
+app.listen(PORT, '0.0.0.0', () => console.log(`Сервер успешно запущен на порту ${PORT}`));
