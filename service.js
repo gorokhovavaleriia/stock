@@ -1,6 +1,27 @@
+const express = require('express');
+const axios = require('axios');
+const dayjs = require('dayjs');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+
+const MS_TOKEN = process.env.MS_TOKEN; 
+const LOGIN = 'admin';       // Логин для входа на ваш сайт
+const PASSWORD = 'password123'; // Пароль для входа на ваш сайт
+
+// 1. Роут для проверки логина и пароля
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === LOGIN && password === PASSWORD) {
+        return res.json({ success: true });
+    }
+    res.status(401).json({ error: 'Неверный логин или пароль' });
+});
+
 // НАЧАЛО ЗАМЕНЫ: Найдите роут /api/stock-history и замените его до конца файла
 
-app.get('/api/stock-history', async (req, res) => {
+    app.get('/api/stock-history', async (req, res) => {
     const productId = req.query.productId;
     if (!productId) return res.status(400).json({ error: 'Не указан productId' });
 
